@@ -1,0 +1,19 @@
+{
+  "name": "zenfi-sdk",
+  "version": "1.0.0",
+  "description": "JS SDK for Zenfi partners",
+  "main": "dist/index.js",
+  "repository": "https://github.com/zenfi/js-sdk",
+  "author": "ZEN FINTECH SAPI DE CV",
+  "license": "MIT",
+  "private": true,
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "js-cookie": "^2.2.1"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6"
+  }
+}
