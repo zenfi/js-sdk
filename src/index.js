@@ -26,7 +26,7 @@ class ZenfiSDK {
     this.cookies.setToken(this.token);
   }
 
-  fetchData() {
+  async fetchData() {
     if (this.leadData) return self;
     // Fetch data from Zenfi API
     // Set results to leadData

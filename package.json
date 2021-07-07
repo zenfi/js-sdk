@@ -8,12 +8,15 @@
   "license": "MIT",
   "private": true,
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testMatch": [ "**/__tests__/**/?(*.)+(spec|test).[jt]s?(x)" ]
   },
   "dependencies": {
     "js-cookie": "^2.2.1"
   },
   "devDependencies": {
-    "jest": "^27.0.6"
+    "jest": "^27.0.6",
+    "nock": "^13.1.1",
+    "node-fetch": "^2.6.1"
   }
 }
