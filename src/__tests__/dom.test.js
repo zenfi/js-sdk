@@ -3,7 +3,7 @@ const { fillTarget } = require('../dom');
 describe('.fillTarget', () => {
   const value = 'NEW_VALUE';
   const selector = '.input';
-  const element = { type: 'HTML_NODE' };
+  const element = { __type: 'HTML_NODE' };
   const querySelector = jest.fn(() => element);
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('.fillTarget', () => {
   };
 
   const expectValue = (result, property) => {
-    expect(result.type).toEqual(element.type);
+    expect(result.__type).toEqual(element.__type);
     expect(result[property]).toEqual(value);
     expectSelectionCall();
   };

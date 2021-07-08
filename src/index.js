@@ -1,28 +1,48 @@
 const { fillTarget } = require('./dom');
-const { getUrlParams } = require('./url');
 const { buildCookies } = require('./cookies');
 const { fetchLeadInfo, trackEvent } = require('./fetcher');
+const { getUrlParams, removeUrlParams } = require('./url');
 
 class ZenfiSDK {
   constructor({ partnerName, cookiesDomain, targets } = {}) {
+    this._id = null;
+    this._token = null;
+    this.leadInfo = null;
     this.partnerName = partnerName;
     this.targets = targets;
     this.cookies = buildCookies({ domain: cookiesDomain });
+    this._handleUrlParams();
+  }
 
+  _handleUrlParams() {
     // eslint-disable-next-line no-restricted-globals
     const { id, token } = getUrlParams(location);
-    if (id) this.setId(id);
-    if (token) this.setToken(token);
+    if (id) this.id = id;
+    if (token) {
+      this.token = token;
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState(null, null, removeUrlParams(location.href));
+    }
   }
 
-  setId(id) {
-    this.id = id || null;
-    this.cookies.setId(this.id);
+  set id(id) {
+    this._id = id || null;
+    this.cookies.setId(this._id);
   }
 
-  setToken(token) {
-    this.token = token || null;
+  get id() {
+    if (!this._id) this._id = this.cookies.getId();
+    return this._id;
+  }
+
+  set token(token) {
+    this._token = token || null;
     this.cookies.setToken(this.token);
+  }
+
+  get token() {
+    if (!this._token) this._token = this.cookies.getToken();
+    return this._token;
   }
 
   async fetchData() {

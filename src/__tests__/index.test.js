@@ -7,7 +7,9 @@ const TOKEN = 'ZENFI_TOKEN';
 
 const cookieMock = {
   setId: jest.fn(),
+  getId: jest.fn(),
   setToken: jest.fn(),
+  getToken: jest.fn(),
 };
 
 describe('ZenfiSDK', () => {
@@ -17,6 +19,9 @@ describe('ZenfiSDK', () => {
   jest.spyOn(Fetcher, 'trackEvent');
 
   const ZenfiSDK = require('../index'); // eslint-disable-line global-require
+  const historyMock = {
+    replaceState: jest.fn(),
+  };
   const defaultParams = {
     partnerName: 'Yotepresto',
     cookiesDomain: 'example.com',
@@ -26,15 +31,19 @@ describe('ZenfiSDK', () => {
   const getSDK = (params = {}) => new ZenfiSDK({ ...defaultParams, ...params });
 
   beforeEach(() => {
+    const urlSearch = `?zfid=${ID}&zftoken=${TOKEN}`;
     global.location = {
-      search: `?zfid=${ID}&zftoken=${TOKEN}`,
+      href: `https://example.com/index.html${urlSearch}`,
+      search: urlSearch,
     };
+    global.history = historyMock;
     Dom.fillTarget.mockClear();
     Fetcher.trackEvent.mockClear();
     Fetcher.fetchLeadInfo.mockClear();
     Cookies.buildCookies.mockClear();
     cookieMock.setId.mockClear();
     cookieMock.setToken.mockClear();
+    historyMock.replaceState.mockClear();
   });
 
   describe('#constructor', () => {
@@ -58,27 +67,71 @@ describe('ZenfiSDK', () => {
       expect(zenfi.id).toEqual(ID);
       expect(zenfi.token).toEqual(TOKEN);
     });
+
+    it('replaces the URL to remove the token parameter', () => {
+      getSDK();
+      expect(historyMock.replaceState).toBeCalledTimes(1);
+      expect(historyMock.replaceState).toHaveBeenLastCalledWith(
+        null,
+        null,
+        `https://example.com/index.html?zfid=${ID}`,
+      );
+    });
   });
 
-  describe('#setId', () => {
+  describe('#set id', () => {
     it('sets the new id property and stores it in a cookie', () => {
       const value = 'NewID';
       const zenfi = getSDK();
-      zenfi.setId(value);
+      zenfi.id = value;
       expect(zenfi.id).toEqual(value);
       expect(cookieMock.setId).toBeCalledTimes(2);
       expect(cookieMock.setId).toHaveBeenLastCalledWith(value);
     });
   });
 
-  describe('#setToken', () => {
+  describe('#get id', () => {
+    const storedValue = 'StoredId';
+
+    beforeEach(() => cookieMock.getId.mockImplementationOnce(() => storedValue));
+
+    it('returns value stored in cookie and sets in "_id" variable', () => {
+      const zenfi = getSDK();
+      zenfi._id = undefined;
+
+      const result = zenfi.id;
+      expect(result).toEqual(storedValue);
+      expect(zenfi._id).toEqual(storedValue);
+      expect(cookieMock.getId).toBeCalledTimes(1);
+      expect(cookieMock.getId).toHaveBeenLastCalledWith();
+    });
+  });
+
+  describe('#set token', () => {
     it('sets the new token property and stores it in a cookie', () => {
       const value = 'NewToken';
       const zenfi = getSDK();
-      zenfi.setToken(value);
+      zenfi.token = value;
       expect(zenfi.token).toEqual(value);
       expect(cookieMock.setToken).toBeCalledTimes(2);
       expect(cookieMock.setToken).toHaveBeenLastCalledWith(value);
+    });
+  });
+
+  describe('#get token', () => {
+    const storedValue = 'StoredToken';
+
+    beforeEach(() => cookieMock.getToken.mockImplementationOnce(() => storedValue));
+
+    it('returns value stored in cookie and sets in "_token" variable', () => {
+      const zenfi = getSDK();
+      zenfi._token = undefined;
+
+      const result = zenfi.token;
+      expect(result).toEqual(storedValue);
+      expect(zenfi._token).toEqual(storedValue);
+      expect(cookieMock.getToken).toBeCalledTimes(1);
+      expect(cookieMock.getToken).toHaveBeenLastCalledWith();
     });
   });
 
