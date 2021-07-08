@@ -5,17 +5,18 @@ const Fetcher = require('../fetcher');
 const ID = 'ZENFI_ID';
 const TOKEN = 'ZENFI_TOKEN';
 
+const cookieMock = {
+  setId: jest.fn(),
+  setToken: jest.fn(),
+};
+
 describe('ZenfiSDK', () => {
   jest.spyOn(Cookies, 'buildCookies').mockImplementation(() => cookieMock);
   jest.spyOn(Dom, 'fillTarget').mockImplementation();
   jest.spyOn(Fetcher, 'fetchLeadInfo');
   jest.spyOn(Fetcher, 'trackEvent');
 
-  const ZenfiSDK = require('../index');
-  const cookieMock = {
-    setId: jest.fn(),
-    setToken: jest.fn(),
-  };
+  const ZenfiSDK = require('../index'); // eslint-disable-line global-require
   const defaultParams = {
     partnerName: 'Yotepresto',
     cookiesDomain: 'example.com',
@@ -97,8 +98,8 @@ describe('ZenfiSDK', () => {
 
     it('calls fetchLeadInfo only once', async () => {
       const zenfi = getSDK();
-      for (let i = 0; i < 5; i++) {
-        await zenfi.fetchData();
+      for (let i = 0; i < 5; i += 1) {
+        await zenfi.fetchData(); // eslint-disable-line no-await-in-loop
       }
       expect(Fetcher.fetchLeadInfo).toBeCalledTimes(1);
     });
@@ -184,8 +185,10 @@ describe('ZenfiSDK', () => {
         zenfi.trackEvent(eventType, eventName, eventProperties);
       };
 
+      // eslint-disable-next-line jest/expect-expect
       it('throws error when partnerName is falsy', expectPartnerException(testCase));
 
+      // eslint-disable-next-line jest/expect-expect
       it('sends an event to fetcher', expectSendingEvent(eventType, testCase));
     });
 
@@ -195,8 +198,10 @@ describe('ZenfiSDK', () => {
         zenfi.trackConversion(eventName, eventProperties);
       };
 
+      // eslint-disable-next-line jest/expect-expect
       it('throws error when partnerName is falsy', expectPartnerException(testCase));
 
+      // eslint-disable-next-line jest/expect-expect
       it('sends an event to fetcher', expectSendingEvent(eventType, testCase));
     });
 
@@ -206,8 +211,10 @@ describe('ZenfiSDK', () => {
         zenfi.trackAbortion(eventName, eventProperties);
       };
 
+      // eslint-disable-next-line jest/expect-expect
       it('throws error when partnerName is falsy', expectPartnerException(testCase));
 
+      // eslint-disable-next-line jest/expect-expect
       it('sends an event to fetcher', expectSendingEvent(eventType, testCase));
     });
   });

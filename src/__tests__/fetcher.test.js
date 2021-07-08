@@ -1,11 +1,12 @@
 const nock = require('nock');
+const fetchPolyfill = require('node-fetch');
 const requests = require('./mocks/requests');
 const { fetchLeadInfo, trackEvent } = require('../fetcher');
 
 const API_HOST = 'https://api.zenfi.mx';
 const TOKEN = 'SAMPLE_TOKEN';
 
-if (!global.fetch) global.fetch = require('node-fetch');
+if (!global.fetch) global.fetch = fetchPolyfill;
 
 describe('fetcher', () => {
   describe('.fetchLeadInfo', () => {

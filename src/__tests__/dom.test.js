@@ -3,7 +3,7 @@ const { fillTarget } = require('../dom');
 describe('.fillTarget', () => {
   const value = 'NEW_VALUE';
   const selector = '.input';
-  const element = { __type: 'HTML_NODE' };
+  const element = { type: 'HTML_NODE' };
   const querySelector = jest.fn(() => element);
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('.fillTarget', () => {
   };
 
   const expectValue = (result, property) => {
-    expect(result.__type).toEqual(element.__type);
+    expect(result.type).toEqual(element.type);
     expect(result[property]).toEqual(value);
     expectSelectionCall();
   };
@@ -36,6 +36,7 @@ describe('.fillTarget', () => {
   describe('strategy is "value"', () => {
     const strategy = 'value';
 
+    // eslint-disable-next-line jest/expect-expect
     it('sets the value of the element and returns it', () => {
       const result = fillTarget({ selector, value, strategy });
       expectValue(result, 'value');
@@ -45,6 +46,7 @@ describe('.fillTarget', () => {
   describe('strategy is "html"', () => {
     const strategy = 'html';
 
+    // eslint-disable-next-line jest/expect-expect
     it('sets the innerText of the element and returns it', () => {
       const result = fillTarget({ selector, value, strategy });
       expectValue(result, 'innerText');
@@ -54,6 +56,7 @@ describe('.fillTarget', () => {
   describe('strategy is falsy', () => {
     const strategy = null;
 
+    // eslint-disable-next-line jest/expect-expect
     it('uses value strategy by default', () => {
       const result = fillTarget({ selector, value, strategy });
       expectValue(result, 'value');

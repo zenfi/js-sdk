@@ -4,15 +4,12 @@ const { buildCookies } = require('./cookies');
 const { fetchLeadInfo, trackEvent } = require('./fetcher');
 
 class ZenfiSDK {
-  leadInfo = null;
-  token = null;
-  id = null;
-
   constructor({ partnerName, cookiesDomain, targets } = {}) {
     this.partnerName = partnerName;
     this.targets = targets;
     this.cookies = buildCookies({ domain: cookiesDomain });
 
+    // eslint-disable-next-line no-restricted-globals
     const { id, token } = getUrlParams(location);
     if (id) this.setId(id);
     if (token) this.setToken(token);

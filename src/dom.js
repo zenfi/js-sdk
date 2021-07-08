@@ -1,7 +1,7 @@
 const STRATEGIES = {
   value: 'value',
-  html: 'html'
-}
+  html: 'html',
+};
 
 function fillTarget({ selector, value, ...params }) {
   const strategy = params.strategy || STRATEGIES.value;
