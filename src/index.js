@@ -1,8 +1,10 @@
+const { fillTarget } = require('./dom');
 const { getUrlParams } = require('./url');
 const { buildCookies } = require('./cookies');
+const { fetchLeadInfo, trackEvent } = require('./fetcher');
 
 class ZenfiSDK {
-  leadData = null;
+  leadInfo = null;
   token = null;
   id = null;
 
@@ -27,22 +29,35 @@ class ZenfiSDK {
   }
 
   async fetchData() {
-    if (this.leadData) return self;
-    // Fetch data from Zenfi API
-    // Set results to leadData
+    if (!this.leadInfo) this.leadInfo = await fetchLeadInfo(this.token);
+    return this.leadInfo;
   }
 
-  fillForm() {
-    this.fetchData();
-    // Iterate all targets
+  async fillTargets() {
+    await this.fetchData();
+    (this.targets || []).forEach(({ dataKey, selector, strategy }) => {
+      const value = (this.leadInfo || {})[dataKey];
+      if (value) fillTarget({ selector, value, strategy });
+    });
+  }
+
+  trackEvent(type, name, properties) {
+    if (!this.partnerName) throw new Error('Parameter "partnerName" is required to track events');
+    return trackEvent({
+      type,
+      partner: this.partnerName,
+      zenfiId: this.id,
+      event: name,
+      meta: properties,
+    });
   }
 
   trackConversion(name, properties) {
-    // Track event with type "conversion"
+    this.trackEvent('converted', name, properties);
   }
 
   trackAbortion(name, properties) {
-    // Track event with type "abortion"
+    this.trackEvent('aborted', name, properties);
   }
 }
 
