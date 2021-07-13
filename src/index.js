@@ -38,7 +38,7 @@ class ZenfiSDK {
 
   set token(token) {
     this._token = token || null;
-    this.cookies.setToken(this.token);
+    this.cookies.setToken(this._token);
   }
 
   get token() {
@@ -47,6 +47,7 @@ class ZenfiSDK {
   }
 
   async fetchData() {
+    if (!this.token) return null;
     if (!this.leadInfo) this.leadInfo = await fetchLeadInfo(this.token);
     return this.leadInfo;
   }
