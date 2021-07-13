@@ -4,6 +4,7 @@ const Fetcher = require('../fetcher');
 
 const ID = 'ZENFI_ID';
 const TOKEN = 'ZENFI_TOKEN';
+const HTML_NODE = 'HTML_NODE';
 
 const cookieMock = {
   setId: jest.fn(),
@@ -14,7 +15,7 @@ const cookieMock = {
 
 describe('ZenfiSDK', () => {
   jest.spyOn(Cookies, 'buildCookies').mockImplementation(() => cookieMock);
-  jest.spyOn(Dom, 'fillTarget').mockImplementation();
+  jest.spyOn(Dom, 'fillTarget').mockImplementation(() => HTML_NODE);
   jest.spyOn(Fetcher, 'fetchLeadInfo');
   jest.spyOn(Fetcher, 'trackEvent');
 
@@ -160,7 +161,7 @@ describe('ZenfiSDK', () => {
 
   describe('#fillTargets', () => {
     const target1 = { dataKey: 'name', selector: '.nameInput' };
-    const target2 = { dataKey: 'phone', selector: '.phoneInput', strategy: 'html' };
+    const target2 = { dataKey: 'phone', selector: '.phoneInput', strategy: 'text' };
     const target3 = { dataKey: 'email', selector: '.emailInput', strategy: 'value' };
     const emptyTarget = { dataKey: 'age', selector: '.ageInput' };
     const leadInfo = {
@@ -205,6 +206,49 @@ describe('ZenfiSDK', () => {
       const [call1, call2] = Dom.fillTarget.mock.calls;
       expectFill(call1, target1, leadInfo.name);
       expectFill(call2, target2, leadInfo.phone);
+    });
+
+    it('ejecutes "selector" when is a function', async () => {
+      const selectorStr = 'SELECTOR';
+      const selector = jest.fn(() => selectorStr);
+      const target = { ...target1, selector };
+      const zenfi = getSDK({ targets: [target] });
+      zenfi.leadInfo = leadInfo;
+      await zenfi.fillTargets();
+
+      expect(Dom.fillTarget).toBeCalledTimes(1);
+      expect(Dom.fillTarget).toHaveBeenLastCalledWith({
+        selector: selectorStr,
+        strategy: target.strategy,
+        value: leadInfo.name,
+      });
+      expect(target.selector).toBeCalledTimes(1);
+      expect(target.selector).toHaveBeenLastCalledWith({
+        dataKey: target.dataKey,
+        strategy: target.strategy,
+        value: leadInfo.name,
+      });
+    });
+
+    it('ejecutes "afterAction" function when a target declares it', async () => {
+      const afterAction = jest.fn();
+      const target = { ...target1, afterAction };
+      const zenfi = getSDK({ targets: [target] });
+      zenfi.leadInfo = leadInfo;
+      await zenfi.fillTargets();
+
+      const expectedParams = {
+        selector: target.selector,
+        strategy: target.strategy,
+        value: leadInfo.name,
+      };
+      expect(Dom.fillTarget).toBeCalledTimes(1);
+      expect(Dom.fillTarget).toHaveBeenLastCalledWith(expectedParams);
+      expect(afterAction).toBeCalledTimes(1);
+      expect(afterAction).toHaveBeenLastCalledWith({
+        ...expectedParams,
+        element: HTML_NODE,
+      });
     });
   });
 

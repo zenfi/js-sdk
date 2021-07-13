@@ -3,11 +3,12 @@ const { fillTarget } = require('../dom');
 describe('.fillTarget', () => {
   const value = 'NEW_VALUE';
   const selector = '.input';
-  const element = { __type: 'HTML_NODE' };
+  const element = { __type: 'HTML_NODE', click: jest.fn() };
   const querySelector = jest.fn(() => element);
 
   beforeEach(() => {
     global.document = { querySelector };
+    element.click.mockClear();
     querySelector.mockClear();
   });
 
@@ -43,13 +44,24 @@ describe('.fillTarget', () => {
     });
   });
 
-  describe('strategy is "html"', () => {
-    const strategy = 'html';
+  describe('strategy is "text"', () => {
+    const strategy = 'text';
 
     // eslint-disable-next-line jest/expect-expect
     it('sets the innerText of the element and returns it', () => {
       const result = fillTarget({ selector, value, strategy });
       expectValue(result, 'innerText');
+    });
+  });
+
+  describe('strategy is "click"', () => {
+    const strategy = 'click';
+
+    it('class the method "click" of the element', () => {
+      const result = fillTarget({ selector, value, strategy });
+      expect(result.__type).toEqual(element.__type);
+      expect(element.click).toBeCalledTimes(1);
+      expectSelectionCall();
     });
   });
 

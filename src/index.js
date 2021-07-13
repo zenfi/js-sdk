@@ -1,3 +1,4 @@
+const { isNil, isFunction } = require('./utils');
 const { fillTarget } = require('./dom');
 const { buildCookies } = require('./cookies');
 const { fetchLeadInfo, trackEvent } = require('./fetcher');
@@ -52,9 +53,17 @@ class ZenfiSDK {
 
   async fillTargets() {
     await this.fetchData();
-    (this.targets || []).forEach(({ dataKey, selector, strategy }) => {
+    (this.targets || []).forEach((config) => {
+      const { dataKey, strategy, afterAction } = config || {};
       const value = (this.leadInfo || {})[dataKey];
-      if (value) fillTarget({ selector, value, strategy });
+      if (isNil(value)) return;
+
+      const selector = isFunction(config.selector)
+        ? config.selector({ dataKey, strategy, value })
+        : config.selector;
+      const params = { value, selector, strategy };
+      const element = fillTarget(params);
+      if (isFunction(afterAction)) afterAction({ ...params, element });
     });
   }
 

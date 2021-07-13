@@ -1,6 +1,7 @@
 const STRATEGIES = {
   value: 'value',
-  html: 'html',
+  click: 'click',
+  text: 'text',
 };
 
 function fillTarget({ selector, value, ...params }) {
@@ -9,7 +10,8 @@ function fillTarget({ selector, value, ...params }) {
 
   if (!element) return null;
   if (strategy === STRATEGIES.value) element.value = value;
-  if (strategy === STRATEGIES.html) element.innerText = value;
+  if (strategy === STRATEGIES.text) element.innerText = value;
+  if (strategy === STRATEGIES.click) element.click();
   return element;
 }
 
