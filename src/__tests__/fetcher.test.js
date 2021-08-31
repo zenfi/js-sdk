@@ -36,6 +36,18 @@ describe('fetcher', () => {
         expect(results).toEqual({});
       });
     });
+
+    describe('when token is not valid anymore', () => {
+      beforeEach(() => mockRequest(requests.leadsInfo.unauthorized));
+
+      it('raises an error', async () => {
+        await expect(async () => {
+          await fetchLeadInfo(TOKEN);
+        })
+          .rejects
+          .toThrow(new Error('UNAUTHORIZED'));
+      });
+    });
   });
 
   describe('.trackEvent', () => {

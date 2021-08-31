@@ -38,6 +38,10 @@ class ZenfiSDK {
 
   set token(token) {
     this._token = token || null;
+    if (!this._token) {
+      this.cookies.removeToken();
+      return;
+    }
     this.cookies.setToken(this._token);
   }
 
@@ -48,14 +52,24 @@ class ZenfiSDK {
 
   async fetchData() {
     if (!this.token) return null;
-    if (!this.leadInfo) this.leadInfo = await fetchLeadInfo(this.token);
+    try {
+      if (!this.leadInfo) this.leadInfo = await fetchLeadInfo(this.token);
+    } catch (error) {
+      if (error.message.includes('UNAUTHORIZED')) this.token = null;
+    }
     return this.leadInfo;
   }
 
   async fillTargets() {
     await this.fetchData();
     (this.targets || []).forEach((config) => {
-      const { dataKey, strategy, afterAction } = config || {};
+      const {
+        dataKey,
+        strategy,
+        beforeAction,
+        afterAction,
+      } = config || {};
+
       const value = (this.leadInfo || {})[dataKey];
       if (isNil(value)) return;
 
@@ -63,6 +77,7 @@ class ZenfiSDK {
         ? config.selector({ dataKey, strategy, value })
         : config.selector;
       const params = { value, selector, strategy };
+      if (isFunction(beforeAction)) beforeAction(params);
       const element = fillTarget(params);
       if (isFunction(afterAction)) afterAction({ ...params, element });
     });

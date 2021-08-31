@@ -14,20 +14,26 @@ const DEFAULT_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-function fetchLeadInfo(token) {
+async function fetchLeadInfo(token) {
   const { url: baseUrl, method } = ENDPOINTS.leadsInfo;
   const url = `${baseUrl}?token=${token}`;
 
-  return fetch(url, {
+  const response = await fetch(url, {
     method,
     headers: DEFAULT_HEADERS,
-  })
-    .then((response) => response.json())
-    .then((data) => data.info || {});
+  });
+  const data = await response.json();
+  if (response.ok) return data.info || {};
+  if (response.status === 401) throw new Error('UNAUTHORIZED');
+  throw new Error(data.code);
 }
 
 function trackEvent({
-  partner, type, zenfiId, event, meta,
+  meta,
+  type,
+  event,
+  partner,
+  zenfiId,
 }) {
   const { url: baseUrl, method } = ENDPOINTS.trackEvent;
   const url = baseUrl

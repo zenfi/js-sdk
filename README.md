@@ -1,6 +1,6 @@
 # Zenfi JavaScript SDK
 
-![](https://img.shields.io/github/workflow/status/zenfi/js-sdk/tests?style=flat)
+![](https://img.shields.io/github/workflow/status/zenfi/js-sdk/Tests?style=flat)
 ![](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
 JavaScript SDK for Zenfi partners. Useful to:
@@ -26,7 +26,7 @@ Add the following script to your project:
 <script src="https://cdn.jsdelivr.net/gh/zenfi/js-sdk@main/dist/index.js" type="text/javascript"></script>
 
 <!-- Or specify a version -->
-<script src="https://cdn.jsdelivr.net/gh/zenfi/js-sdk@v1.0.0/dist/index.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/gh/zenfi/js-sdk@v1.1.0/dist/index.js" type="text/javascript"></script>
 
 <!-- This will export a variable named "ZenfiSDK": -->
 <script type="text/javascript">
@@ -52,6 +52,7 @@ Creates a new instance of the Zenfi SDK.
 |`targets.dataKey`|String|-|The name of the key in the `leadInfo` object which contains the information to be filled.|
 |`targets.selector`|String \| Function|-|The css selector to find the element in the DOM. If a function is passed, it will receive an object with `{ dataKey, strategy, value }` as param properties and must return a string with the css selector.|
 |`targets.strategy`|Enum(`value` \| `text` \| `click`)|`value`|Indicates the type of strategy to fill the DOM element. Possible values are: `value`: sets the value property of an input, `text`: puts the content inside the HTML tag as text, used for `<div />`s, `click`: triggers a click on the DOM element.|
+|`targets.beforeAction`|Function|-|An optional function that is executed before the target is filled. It will receive an object with `{ selector, strategy, value }` properties.|
 |`targets.afterAction`|Function|-|An optional function that is executed after the target is filled. It will receive an object with `{ element, selector, strategy, value }` properties (`element` is the DOM node being filled).|
 
 
@@ -71,6 +72,7 @@ const zenfi = new ZenfiSDK({
       dataKey: 'email',
       strategy: 'value',
       selector: ({ dataKey }) => `#${dataKey}Input`,
+      beforeAction: () => console.log('before filling info'),
       afterAction: ({ element }) => element.classList.add('changed'),
     },
   ],

@@ -11,6 +11,7 @@ const cookieMock = {
   getId: jest.fn(),
   setToken: jest.fn(),
   getToken: jest.fn(),
+  removeToken: jest.fn(),
 };
 
 describe('ZenfiSDK', () => {
@@ -44,6 +45,7 @@ describe('ZenfiSDK', () => {
     Cookies.buildCookies.mockClear();
     cookieMock.setId.mockClear();
     cookieMock.setToken.mockClear();
+    cookieMock.removeToken.mockClear();
     historyMock.replaceState.mockClear();
   });
 
@@ -139,23 +141,42 @@ describe('ZenfiSDK', () => {
   describe('#fetchData', () => {
     const leadInfo = { name: 'Chewbacca' };
 
-    Fetcher.fetchLeadInfo.mockImplementation(() => Promise.resolve(leadInfo));
+    describe('when returns lead info', () => {
+      beforeEach(() => {
+        Fetcher.fetchLeadInfo.mockImplementationOnce(() => Promise.resolve(leadInfo));
+      });
 
-    it('calls fetcher.fetchLeadInfo with token', async () => {
-      const zenfi = getSDK();
-      const results = await zenfi.fetchData();
-      expect(results).toEqual(leadInfo);
-      expect(zenfi.leadInfo).toEqual(leadInfo);
-      expect(Fetcher.fetchLeadInfo).toBeCalledTimes(1);
-      expect(Fetcher.fetchLeadInfo).toHaveBeenLastCalledWith(TOKEN);
+      it('calls fetcher.fetchLeadInfo with token', async () => {
+        const zenfi = getSDK();
+        const results = await zenfi.fetchData();
+        expect(results).toEqual(leadInfo);
+        expect(zenfi.leadInfo).toEqual(leadInfo);
+        expect(Fetcher.fetchLeadInfo).toBeCalledTimes(1);
+        expect(Fetcher.fetchLeadInfo).toHaveBeenLastCalledWith(TOKEN);
+      });
+
+      it('calls fetchLeadInfo only once', async () => {
+        const zenfi = getSDK();
+        for (let i = 0; i < 5; i += 1) {
+          await zenfi.fetchData(); // eslint-disable-line no-await-in-loop
+        }
+        expect(Fetcher.fetchLeadInfo).toBeCalledTimes(1);
+      });
     });
 
-    it('calls fetchLeadInfo only once', async () => {
-      const zenfi = getSDK();
-      for (let i = 0; i < 5; i += 1) {
-        await zenfi.fetchData(); // eslint-disable-line no-await-in-loop
-      }
-      expect(Fetcher.fetchLeadInfo).toBeCalledTimes(1);
+    describe('when throw unauthorized error', () => {
+      beforeEach(() => {
+        Fetcher.fetchLeadInfo.mockImplementationOnce(() => Promise.reject(new Error('UNAUTHORIZED')));
+      });
+
+      it('removes the token cookie', async () => {
+        const zenfi = getSDK();
+        const results = await zenfi.fetchData();
+        expect(results).toEqual(null);
+        expect(zenfi.leadInfo).toEqual(null);
+        expect(cookieMock.removeToken).toBeCalledTimes(1);
+        expect(cookieMock.removeToken).toHaveBeenLastCalledWith();
+      });
     });
   });
 
@@ -208,7 +229,7 @@ describe('ZenfiSDK', () => {
       expectFill(call2, target2, leadInfo.phone);
     });
 
-    it('ejecutes "selector" when is a function', async () => {
+    it('executes "selector" when is a function', async () => {
       const selectorStr = 'SELECTOR';
       const selector = jest.fn(() => selectorStr);
       const target = { ...target1, selector };
@@ -230,7 +251,25 @@ describe('ZenfiSDK', () => {
       });
     });
 
-    it('ejecutes "afterAction" function when a target declares it', async () => {
+    it('executes "beforeAction" function when a target declares it', async () => {
+      const beforeAction = jest.fn();
+      const target = { ...target1, beforeAction };
+      const zenfi = getSDK({ targets: [target] });
+      zenfi.leadInfo = leadInfo;
+      await zenfi.fillTargets();
+
+      const expectedParams = {
+        selector: target.selector,
+        strategy: target.strategy,
+        value: leadInfo.name,
+      };
+      expect(beforeAction).toBeCalledTimes(1);
+      expect(beforeAction).toHaveBeenLastCalledWith(expectedParams);
+      expect(Dom.fillTarget).toBeCalledTimes(1);
+      expect(Dom.fillTarget).toHaveBeenLastCalledWith(expectedParams);
+    });
+
+    it('executes "afterAction" function when a target declares it', async () => {
       const afterAction = jest.fn();
       const target = { ...target1, afterAction };
       const zenfi = getSDK({ targets: [target] });

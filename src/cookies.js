@@ -7,26 +7,38 @@ function buildCookies({ domain }) {
     token: 'zenfi_token',
   };
 
-  const setCookie = (name, value) => Cookies.set(name, value, {
+  const getCookie = (name) => Cookies.get(name);
+
+  const setCookie = (name, value, expires = ONE_YEAR) => Cookies.set(name, value, {
     domain,
+    expires,
     path: '/',
     secure: true,
-    expires: ONE_YEAR,
   });
 
-  const getId = () => Cookies.get(COOKIE_NAMES.id);
+  const removeCookie = (name) => Cookies.remove(name, {
+    domain,
+    path: '/',
+  });
+
+  const getId = () => getCookie(COOKIE_NAMES.id);
 
   const setId = (value) => setCookie(COOKIE_NAMES.id, value);
 
-  const getToken = () => Cookies.get(COOKIE_NAMES.token);
+  const getToken = () => getCookie(COOKIE_NAMES.token);
 
   const setToken = (value) => setCookie(COOKIE_NAMES.token, value);
+
+  const removeToken = (value) => removeCookie(COOKIE_NAMES.token, value);
 
   return {
     getId,
     setId,
     getToken,
     setToken,
+    removeToken,
+    set: setCookie,
+    get: getCookie,
   };
 }
 
