@@ -4,7 +4,7 @@
   "description": "JS SDK for Zenfi partners",
   "main": "dist/index.js",
   "repository": "https://github.com/zenfi/js-sdk",
-  "author": "ZEN FINTECH SAPI DE CV",
+  "author": "ZENFI TECNOLOGÍAS SAPI DE CV",
   "license": "MIT",
   "private": true,
   "jest": {
