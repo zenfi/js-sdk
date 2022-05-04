@@ -302,34 +302,45 @@ describe('ZenfiSDK', () => {
       expect(() => testCase(zenfi)).toThrow('Parameter "partnerName" is required to track events');
     };
 
-    const expectSendingEvent = (expectedType, testCase) => () => {
+    const expectSendingEvent = (
+      testCase,
+      expectedParams = {},
+    ) => () => {
       const zenfi = getSDK();
       testCase(zenfi);
       expect(Fetcher.trackEvent).toBeCalledTimes(1);
       expect(Fetcher.trackEvent).toHaveBeenLastCalledWith({
-        type: expectedType,
+        type: 'converted',
         partner: defaultParams.partnerName,
         zenfiId: ID,
         event: eventName,
         meta: eventProperties,
+        ...expectedParams,
       });
     };
 
     describe('#trackEvent', () => {
-      const eventType = 'EVENT_TYPE';
+      const type = 'EVENT_TYPE';
       const testCase = (zenfi) => {
-        zenfi.trackEvent(eventType, eventName, eventProperties);
+        zenfi.trackEvent(type, eventName, eventProperties);
       };
 
       // eslint-disable-next-line jest/expect-expect
       it('throws error when partnerName is falsy', expectPartnerException(testCase));
 
       // eslint-disable-next-line jest/expect-expect
-      it('sends an event to fetcher', expectSendingEvent(eventType, testCase));
+      it('sends an event to fetcher', expectSendingEvent(testCase, { type }));
+
+      it('sends nothing when tokes does not exist', () => {
+        const zenfi = getSDK();
+        zenfi._token = null;
+        testCase(zenfi);
+        expect(Fetcher.trackEvent).not.toBeCalled();
+      });
     });
 
     describe('#trackConversion', () => {
-      const eventType = 'converted';
+      const type = 'converted';
       const testCase = (zenfi) => {
         zenfi.trackConversion(eventName, eventProperties);
       };
@@ -338,11 +349,11 @@ describe('ZenfiSDK', () => {
       it('throws error when partnerName is falsy', expectPartnerException(testCase));
 
       // eslint-disable-next-line jest/expect-expect
-      it('sends an event to fetcher', expectSendingEvent(eventType, testCase));
+      it('sends an event to fetcher', expectSendingEvent(testCase, { type }));
     });
 
     describe('#trackAbortion', () => {
-      const eventType = 'aborted';
+      const type = 'aborted';
       const testCase = (zenfi) => {
         zenfi.trackAbortion(eventName, eventProperties);
       };
@@ -351,7 +362,61 @@ describe('ZenfiSDK', () => {
       it('throws error when partnerName is falsy', expectPartnerException(testCase));
 
       // eslint-disable-next-line jest/expect-expect
-      it('sends an event to fetcher', expectSendingEvent(eventType, testCase));
+      it('sends an event to fetcher', expectSendingEvent(testCase, { type }));
+    });
+
+    describe('#trackPageView', () => {
+      const type = 'converted';
+      const event = 'PageView';
+      const location = {
+        href: 'https://zenfi.mx/home?foo=bar#hash',
+        hash: '#hash',
+        search: '?foo=bar',
+        protocol: 'https:',
+        hostname: 'zenfi.mx',
+        pathname: '/home',
+      }
+      const testCase = (zenfi) => {
+        zenfi.trackPageView();
+      };
+
+      beforeEach(() => {
+        global.window = { location };
+      });
+
+      // eslint-disable-next-line jest/expect-expect
+      it('throws error when partnerName is falsy', expectPartnerException(testCase));
+
+      // eslint-disable-next-line jest/expect-expect
+      it('sends an event to fetcher', expectSendingEvent(testCase, {
+        event,
+        type,
+        meta: location,
+      }));
+    });
+  });
+
+  describe('#initPageViewsTracking', () => {
+    const dispatchEvent = jest.fn();
+    const addEventListener = jest.fn((_event, fn) => fn());
+
+    beforeEach(() => {
+      dispatchEvent.mockClear();
+      addEventListener.mockClear();
+      Fetcher.trackEvent.mockImplementation();
+      global.window.history = {};
+      global.window.dispatchEvent = dispatchEvent;
+      global.window.addEventListener = addEventListener;
+      global.Event = class {};
+    });
+
+    it('adds listeners that calls page view tracking', () => {
+      const zenfi = getSDK();
+      zenfi.initPageViewsTracking();
+      expect(addEventListener).toBeCalled();
+      expect(addEventListener).toBeCalledWith('locationchange', expect.any(Function));
+      expect(addEventListener).toBeCalled();
+      expect(Fetcher.trackEvent).toBeCalledTimes(2);
     });
   });
 });

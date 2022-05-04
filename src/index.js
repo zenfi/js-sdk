@@ -1,8 +1,8 @@
-const { isNil, isFunction } = require('./utils');
 const { fillTarget } = require('./dom');
 const { buildCookies } = require('./cookies');
 const { fetchLeadInfo, trackEvent } = require('./fetcher');
 const { getUrlParams, removeUrlParams } = require('./url');
+const { isNil, isFunction, addLocationChangeEvent } = require('./utils');
 
 class ZenfiSDK {
   constructor({ partnerName, cookiesDomain, targets } = {}) {
@@ -84,6 +84,7 @@ class ZenfiSDK {
   }
 
   trackEvent(type, name, properties) {
+    if (!this.token) return null;
     if (!this.partnerName) throw new Error('Parameter "partnerName" is required to track events');
     return trackEvent({
       type,
@@ -100,6 +101,24 @@ class ZenfiSDK {
 
   trackAbortion(name, properties) {
     this.trackEvent('aborted', name, properties);
+  }
+
+  trackPageView() {
+    const properties = {
+      href: window.location.href,
+      hash: window.location.hash,
+      search: window.location.search,
+      protocol: window.location.protocol,
+      hostname: window.location.hostname,
+      pathname: window.location.pathname,
+    };
+    this.trackConversion('PageView', properties);
+  }
+
+  initPageViewsTracking() {
+    this.trackPageView();
+    addLocationChangeEvent();
+    window.addEventListener('locationchange', () => this.trackPageView());
   }
 }
 

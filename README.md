@@ -151,7 +151,7 @@ Sends a conversion event to the Zenfi API (the user is moving forward in the fun
 **Example**
 
 ```javascript
-const zenfi.trackConversion('addToCart', {
+zenfi.trackConversion('addToCart', {
   price: 100,
   amount: 2,
 });
@@ -173,10 +173,42 @@ Sends an abortion event to the Zenfi API (the user was rejected and can not move
 **Example**
 
 ```javascript
-const zenfi.trackConversion('declinedOffer', {
+zenfi.trackConversion('declinedOffer', {
   reason: 'User got a better interest rate elsewhere'
 });
 // It will track a "declinedOffer" event
+```
+
+### `.trackPageView()`
+
+Sends an conversion event with name "PageView" to the Zenfi API. It includes metadata about the visited URL: `href`, `hash`, `search`, `protocol`, `hostname` and `pathname`.
+
+**Parameters**
+
+This function takes no parameters.
+
+
+**Example**
+
+```javascript
+zenfi.trackPageView();
+// It will track a "PageView" event
+```
+
+### `.initPageViewsTracking()`
+
+Starts a listener that tracks page view events automatically.
+
+**Parameters**
+
+This function takes no parameters.
+
+
+**Example**
+
+```javascript
+zenfi.initPageViewsTracking();
+// Listens to url changes and sends events
 ```
 
 

@@ -15,7 +15,8 @@
     "window": true,
     "history": true,
     "document": true,
-    "location": true
+    "location": true,
+    "Event": true
   },
   "rules": {
     "dot-location": ["error", "property"],
