@@ -79,7 +79,7 @@ class ZenfiSDK {
       const params = { value, selector, strategy };
       if (isFunction(beforeAction)) beforeAction(params);
       const element = fillTarget(params);
-      if (isFunction(afterAction)) afterAction({ ...params, element });
+      if (element && isFunction(afterAction)) afterAction({ ...params, element });
     });
   }
 
