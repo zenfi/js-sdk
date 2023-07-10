@@ -5,9 +5,19 @@ describe('.fillTarget', () => {
   const selector = '.input';
   const element = { __type: 'HTML_NODE', click: jest.fn() };
   const querySelector = jest.fn(() => element);
+  const setter = { set: jest.fn() };
+  let originalDescriptor;
+
+  beforeAll(() => {
+    originalDescriptor = Object.getOwnPropertyDescriptor;
+    Object.getOwnPropertyDescriptor = () => setter;
+  });
+
+  afterAll(() => { Object.getOwnPropertyDescriptor = originalDescriptor; });
 
   beforeEach(() => {
     global.document = { querySelector };
+    setter.set.mockClear();
     element.click.mockClear();
     querySelector.mockClear();
   });
@@ -41,6 +51,19 @@ describe('.fillTarget', () => {
     it('sets the value of the element and returns it', () => {
       const result = fillTarget({ selector, value, strategy });
       expectValue(result, 'value');
+    });
+  });
+
+  describe('strategy is "nativeValue"', () => {
+    const strategy = 'nativeValue';
+
+    // eslint-disable-next-line jest/expect-expect
+    it('sets the value using its setter function', () => {
+      const result = fillTarget({ selector, value, strategy });
+      expectSelectionCall();
+      expect(result.__type).toEqual(element.__type);
+      expect(setter.set).toBeCalledTimes(1);
+      expect(setter.set).toBeCalledWith(value);
     });
   });
 
