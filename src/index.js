@@ -1,5 +1,5 @@
-const { fillTarget } = require('./dom');
 const { buildCookies } = require('./cookies');
+const { fillTarget, selectElement } = require('./dom');
 const { fetchLeadInfo, trackEvent } = require('./fetcher');
 const { getUrlParams, removeUrlParams } = require('./url');
 const { isNil, isFunction, addLocationChangeEvent } = require('./utils');
@@ -77,8 +77,10 @@ class ZenfiSDK {
         ? config.selector({ dataKey, strategy, value })
         : config.selector;
       const params = { value, selector, strategy };
-      if (isFunction(beforeAction)) beforeAction(params);
-      const element = fillTarget(params);
+
+      let element = selectElement(selector);
+      if (isFunction(beforeAction)) beforeAction({ ...params, element });
+      element = fillTarget({ ...params, element });
       if (element && isFunction(afterAction)) afterAction({ ...params, element });
     });
   }

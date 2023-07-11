@@ -18,13 +18,18 @@ function setNativeValue(element, value) {
   }
 }
 
-function fillTarget({ selector, value, ...params }) {
+function selectElement(selector) {
+  return document.querySelector(selector);
+}
+
+function fillTarget({ element, value, ...params }) {
   const strategy = params.strategy || STRATEGIES.value;
-  const element = document.querySelector(selector);
 
   if (!element) return null;
+  // eslint-disable-next-line no-param-reassign
   if (strategy === STRATEGIES.value) element.value = value;
   if (strategy === STRATEGIES.nativeValue) setNativeValue(element, value);
+  // eslint-disable-next-line no-param-reassign
   if (strategy === STRATEGIES.text) element.innerText = value;
   if (strategy === STRATEGIES.click) element.click();
   return element;
@@ -32,4 +37,5 @@ function fillTarget({ selector, value, ...params }) {
 
 module.exports = {
   fillTarget,
+  selectElement,
 };

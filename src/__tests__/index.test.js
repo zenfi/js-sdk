@@ -17,6 +17,7 @@ const cookieMock = {
 describe('ZenfiSDK', () => {
   jest.spyOn(Cookies, 'buildCookies').mockImplementation(() => cookieMock);
   jest.spyOn(Dom, 'fillTarget').mockImplementation(() => HTML_NODE);
+  jest.spyOn(Dom, 'selectElement').mockImplementation(() => HTML_NODE);
   jest.spyOn(Fetcher, 'fetchLeadInfo');
   jest.spyOn(Fetcher, 'trackEvent');
 
@@ -191,17 +192,37 @@ describe('ZenfiSDK', () => {
       email: 'chewy@lucasfilm.com',
     };
 
+    const expectSelect = (call, selector) => {
+      expect(call).toEqual([selector]);
+    };
+
     const expectFill = (call, target, value) => {
       const { selector, strategy } = target;
-      expect(call).toEqual([{ selector, strategy, value }]);
+      expect(call).toEqual([{
+        selector, strategy, value, element: HTML_NODE,
+      }]);
     };
 
     it('fetches lead info if not available', async () => {
       const zenfi = getSDK({ targets: [] });
       await zenfi.fillTargets();
 
+      expect(Dom.selectElement).toBeCalledTimes(0);
       expect(Dom.fillTarget).toBeCalledTimes(0);
       expect(Fetcher.fetchLeadInfo).toBeCalledTimes(1);
+    });
+
+    it('calls selectElement for each target', async () => {
+      const targets = [target1, target2, target3];
+      const zenfi = getSDK({ targets });
+      zenfi.leadInfo = leadInfo;
+      await zenfi.fillTargets();
+
+      expect(Dom.selectElement).toBeCalledTimes(targets.length);
+      const [call1, call2, call3] = Dom.selectElement.mock.calls;
+      expectSelect(call1, target1.selector);
+      expectSelect(call2, target2.selector);
+      expectSelect(call3, target3.selector);
     });
 
     it('calls fillTarget for each target', async () => {
@@ -239,6 +260,7 @@ describe('ZenfiSDK', () => {
 
       expect(Dom.fillTarget).toBeCalledTimes(1);
       expect(Dom.fillTarget).toHaveBeenLastCalledWith({
+        element: HTML_NODE,
         selector: selectorStr,
         strategy: target.strategy,
         value: leadInfo.name,
@@ -259,6 +281,7 @@ describe('ZenfiSDK', () => {
       await zenfi.fillTargets();
 
       const expectedParams = {
+        element: HTML_NODE,
         selector: target.selector,
         strategy: target.strategy,
         value: leadInfo.name,
@@ -277,6 +300,7 @@ describe('ZenfiSDK', () => {
       await zenfi.fillTargets();
 
       const expectedParams = {
+        element: HTML_NODE,
         selector: target.selector,
         strategy: target.strategy,
         value: leadInfo.name,
@@ -375,7 +399,7 @@ describe('ZenfiSDK', () => {
         protocol: 'https:',
         hostname: 'zenfi.mx',
         pathname: '/home',
-      }
+      };
       const testCase = (zenfi) => {
         zenfi.trackPageView();
       };

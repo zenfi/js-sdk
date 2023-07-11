@@ -1,6 +1,6 @@
 {
   "name": "zenfi-sdk",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "JS SDK for Zenfi partners",
   "main": "dist/index.js",
   "repository": "https://github.com/zenfi/js-sdk",
