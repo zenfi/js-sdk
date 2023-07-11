@@ -80,8 +80,13 @@ class ZenfiSDK {
 
       let element = selectElement(selector);
       if (isFunction(beforeAction)) beforeAction({ ...params, element });
+
+      // Try to find the element again in case beforeAction changed the DOM
+      element = element || selectElement(selector);
+      if (!element) return;
+
       element = fillTarget({ ...params, element });
-      if (element && isFunction(afterAction)) afterAction({ ...params, element });
+      if (isFunction(afterAction)) afterAction({ ...params, element });
     });
   }
 

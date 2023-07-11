@@ -54,17 +54,6 @@ describe('DOM', () => {
       expect(result[property]).toEqual(value);
     };
 
-    describe('when element is not found', () => {
-      querySelector.mockImplementationOnce(() => null);
-
-      const strategy = 'value';
-
-      it('does nothing and returns null', () => {
-        const result = fillTarget({ element: null, value, strategy });
-        expect(result).toEqual(null);
-      });
-    });
-
     describe('strategy is "value"', () => {
       const strategy = 'value';
 

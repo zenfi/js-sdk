@@ -25,7 +25,6 @@ function selectElement(selector) {
 function fillTarget({ element, value, ...params }) {
   const strategy = params.strategy || STRATEGIES.value;
 
-  if (!element) return null;
   // eslint-disable-next-line no-param-reassign
   if (strategy === STRATEGIES.value) element.value = value;
   if (strategy === STRATEGIES.nativeValue) setNativeValue(element, value);
