@@ -1,6 +1,6 @@
 # Zenfi JavaScript SDK
 
-![](https://img.shields.io/github/workflow/status/zenfi/js-sdk/Tests?style=flat)
+![](https://img.shields.io/github/actions/workflow/status/zenfi/js-sdk/tests.yml?branch=main)
 ![](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
 JavaScript SDK for Zenfi partners. Useful to:
@@ -26,7 +26,7 @@ Add the following script to your project:
 <script src="https://cdn.jsdelivr.net/gh/zenfi/js-sdk@main/dist/index.js" type="text/javascript"></script>
 
 <!-- Or specify a version -->
-<script src="https://cdn.jsdelivr.net/gh/zenfi/js-sdk@v1.1.0/dist/index.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/gh/zenfi/js-sdk@v1.3.3/dist/index.js" type="text/javascript"></script>
 
 <!-- This will export a variable named "ZenfiSDK": -->
 <script type="text/javascript">

@@ -1,12 +1,12 @@
 {
-  "name": "zenfi-sdk",
-  "version": "1.3.2",
+  "name": "@zenfi/js-sdk",
+  "version": "1.3.3",
   "description": "JS SDK for Zenfi partners",
   "main": "dist/index.js",
   "repository": "https://github.com/zenfi/js-sdk",
   "author": "ZENFI TECNOLOGÍAS SAPI DE CV",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "jest": {
     "testEnvironment": "node",
     "testMatch": [
